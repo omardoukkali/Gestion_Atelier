@@ -1,30 +1,42 @@
-%% Diagramme de Cas d'Utilisation
-graph TD
-    actor Employe
-    actor Ouvrier
-    actor ChefAtelier
-    actor Fournisseur
+flowchart TD
+    Employe([Employé])
+    Ouvrier([Ouvrier])
+    ChefAtelier([Chef d'Atelier])
+    Fournisseur([Fournisseur])
 
-    rectangle "Système de Gestion d'Atelier" {
-        Employe -- (Soumettre demande de tâche)
-        Employe -- (Suivre statut de demande)
+    subgraph "Système de Gestion d'Atelier"
+        UC1(Soumettre demande de tâche)
+        UC2(Suivre statut de demande)
+        UC3(Consulter tâches du jour)
+        UC4(Mettre à jour statut tâche)
+        UC5(Saisir fiche travail)
+        UC6(Établir devis de matériel)
+        UC7(Réceptionner livraison)
+        UC8(Valider/refuser demande)
+        UC9(Définir priorité tâche)
+        UC10(Affecter tâche)
+        UC11(Clôturer tâches)
+        UC12(Transformer devis en commande)
+        UC13(Consulter tableau de bord et rapports)
+        UC14(Recevoir commandes)
+        UC15(Émettre livraisons)
+    end
 
-        Ouvrier -- (Consulter tâches du jour)
-        Ouvrier -- (Mettre à jour statut tâche)
-        Ouvrier -- (Saisir fiche travail)
-        Ouvrier -- (Établir devis de matériel)
-        Ouvrier -- (Réceptionner livraison)
+    Employe --- UC1
+    Employe --- UC2
 
-        ChefAtelier -- (Valider/refuser demande)
-        ChefAtelier -- (Définir priorité tâche)
-        ChefAtelier -- (Affecter tâche)
-        ChefAtelier -- (Clôturer tâches)
-        ChefAtelier -- (Transformer devis en commande)
-        ChefAtelier -- (Consulter tableau de bord et rapports)
+    Ouvrier --- UC3
+    Ouvrier --- UC4
+    Ouvrier --- UC5
+    Ouvrier --- UC6
+    Ouvrier --- UC7
 
-        Fournisseur -- (Recevoir commandes)
-        Fournisseur -- (Émettre livraisons)
-    }
+    ChefAtelier --- UC8
+    ChefAtelier --- UC9
+    ChefAtelier --- UC10
+    ChefAtelier --- UC11
+    ChefAtelier --- UC12
+    ChefAtelier --- UC13
 
-    (Recevoir commandes) .> Fournisseur : <<extends>>
-    (Émettre livraisons) .> Fournisseur : <<extends>>
+    UC14 --- Fournisseur
+    UC15 --- Fournisseur

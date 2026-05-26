@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant Employe
+    participant Systeme
+    participant ChefAtelier
+    participant Ouvrier
+
+    Employe->>Systeme: Soumet une demande de tâche
+    activate Systeme
+    Systeme-->>Employe: Enregistre la demande (statut "En attente")
+    Systeme->>ChefAtelier: Notifie d'une nouvelle demande
+    deactivate Systeme
+
+    ChefAtelier->>Systeme: Consulte la liste des demandes
+    activate Systeme
+    Systeme-->>ChefAtelier: Affiche les demandes
+    ChefAtelier->>Systeme: Accepte/Refuse la demande et définit la priorité
+    Systeme-->>ChefAtelier: Confirme l'action
+    alt Si acceptée
+        ChefAtelier->>Systeme: Affecte la tâche à un ouvrier
+        activate Systeme
+        Systeme-->>ChefAtelier: Confirme l'affectation
+        Systeme->>Ouvrier: Notifie de la nouvelle tâche
+        deactivate Systeme
+    else Si refusée
+        Systeme-->>Employe: Notifie du refus de la demande
+    end
+    Ouvrier->>Systeme: La tâche apparaît dans son planning
+    deactivate Systeme

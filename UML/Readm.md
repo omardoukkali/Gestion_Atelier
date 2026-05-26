@@ -1,31 +1,72 @@
-# 🛠️ Application Web — Gestion d'Atelier
-Ce projet démontre une architecture moderne de gestion industrielle utilisant **Laravel 10** et **Vue.js 3**, entièrement conteneurisée avec **Docker**.
+classDiagram
+    %% Configuration du style
+    direction BT
+    
+    namespace Authentification {
+        class User {
+            +int id
+            +string nom
+            +string email
+            +string role
+            +login()
+            +checkRole()
+        }
+    }
 
-## 🏗️ Architecture du Système
-Ce diagramme illustre le flux de données entre les conteneurs Docker, la logique métier Laravel et l'interface utilisateur dynamique.
+    namespace Atelier {
+        class Vehicule {
+            +int id
+            +string immatriculation
+            +string marque
+            +string modele
+            +int km_actuel
+        }
+        class Tache {
+            +int id
+            +string type
+            +string statut
+            +string priorite
+            +text description
+            +updateStatus()
+        }
+        class FicheTravail {
+            +int id
+            +date date_realisation
+            +string observations
+            +int temps_passe
+        }
+    }
 
-```mermaid
-graph TD
-    subgraph "Infrastructure Layer (Docker Compose)"
-        A[Nginx Web Server] -- "Proxy Pass" --> B[PHP-FPM Container]
-        B -- "Queries" --> C[(PostgreSQL Database)]
-        D[Node.js Worker] -- "Vite Build" --> B
-    end
+    namespace Logistique {
+        class StockPiece {
+            +int id
+            +string designation
+            +int quantite
+            +int seuil_alerte
+            +isLowStock()
+        }
+        class Commande {
+            +int id
+            +string statut
+            +date date_commande
+            +valider()
+        }
+        class Fournisseur {
+            +int id
+            +string nom
+            +string contact
+        }
+    }
 
-    subgraph "Application Layer (Laravel MVC)"
-        B --> E[Models: User, Tache, Stock]
-        E --> F[Controllers & Policies]
-        F --> G[Blade Templates]
-    end
+    %% Relations avec labels clairs
+    User "1" -- "*" Tache : est assigné
+    Vehicule "1" -- "*" Tache : possède
+    Tache "1" -- "1" FicheTravail : génère
+    FicheTravail "*" -- "*" StockPiece : consomme
+    Commande "1" -- "*" StockPiece : inclut
+    Fournisseur "1" -- "*" Commande : traite
 
-    subgraph "User Interface (Vue.js 3)"
-        G -- "Mounts" --> H[Vue Components]
-        H -- "Interactions" --> I[TaskBoard / StockTable]
-        I -- "Forms (Inertia/Vite)" --> F
-    end
-
-    subgraph "DevOps & CI/CD (GitHub Actions)"
-        J[Git Push] --> K{Pipeline CI/CD}
-        K --> L[Lint & PHPUnit Tests]
-        L --> M[Build Assets]
-    end
+    %% Styles visuels (Couleurs)
+    style User fill:#f9f,stroke:#333,stroke-width:2px
+    style Tache fill:#bbf,stroke:#333,stroke-width:2px
+    style StockPiece fill:#dfd,stroke:#333,stroke-width:2px

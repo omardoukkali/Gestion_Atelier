@@ -1,0 +1,33 @@
+```mermaid
+%% Diagramme de Cas d'Utilisation
+graph TD
+    actor Employe
+    actor Ouvrier
+    actor ChefAtelier
+    actor Fournisseur
+
+    rectangle "Système de Gestion d'Atelier" {
+        Employe -- (Soumettre demande de tâche)
+        Employe -- (Suivre statut de demande)
+
+        Ouvrier -- (Consulter tâches du jour)
+        Ouvrier -- (Mettre à jour statut tâche)
+        Ouvrier -- (Saisir fiche travail)
+        Ouvrier -- (Établir devis de matériel)
+        Ouvrier -- (Réceptionner livraison)
+
+        ChefAtelier -- (Valider/refuser demande)
+        ChefAtelier -- (Définir priorité tâche)
+        ChefAtelier -- (Affecter tâche)
+        ChefAtelier -- (Clôturer tâches)
+        ChefAtelier -- (Transformer devis en commande)
+        ChefAtelier -- (Consulter tableau de bord et rapports)
+
+        Fournisseur -- (Recevoir commandes)
+        Fournisseur -- (Émettre livraisons)
+    }
+
+    (Recevoir commandes) .> Fournisseur : <<extends>>
+    (Émettre livraisons) .> Fournisseur : <<extends>>
+
+```

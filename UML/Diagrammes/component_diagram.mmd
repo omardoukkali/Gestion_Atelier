@@ -1,0 +1,17 @@
+```mermaid
+C4Context
+    title Diagramme de Composants
+
+    System_Boundary(app, "Application Web Gestion d'Atelier") {
+        Component(frontend, "Couche présentation", "Vue.js 3, Blade, Tailwind CSS", "Interface utilisateur dynamique")
+        Component(backend, "Couche métier (Backend)", "Laravel 10, Eloquent ORM", "Logique applicative, validation")
+        Component(database, "Couche données", "PostgreSQL", "Persistance des données")
+        Component(build_assets, "Build des assets", "Vite + Node.js", "Compilation JS/CSS")
+        Component(auth, "Authentification", "Laravel Breeze + Middleware", "Gestion des sessions et rôles")
+    }
+
+    Rel(frontend, backend, "Appelle API", "HTTP/JSON")
+    Rel(backend, database, "Accède", "SQL")
+    Rel(build_assets, frontend, "Génère", "JS/CSS")
+    Rel(auth, backend, "Utilise", "Middleware")
+```

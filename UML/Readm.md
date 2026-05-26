@@ -16,6 +16,7 @@ classDiagram
             +string email
             +string role
             +login()
+            +checkRole()
         }
     }
 
@@ -23,14 +24,23 @@ classDiagram
         class Vehicule {
             +int id
             +string immatriculation
+            +string marque
             +string modele
             +int km_actuel
         }
         class Tache {
             +int id
+            +string type
             +string statut
             +string priorite
+            +text description
             +updateStatus()
+        }
+        class FicheTravail {
+            +int id
+            +date date_realisation
+            +string observations
+            +int temps_passe
         }
     }
 
@@ -39,7 +49,19 @@ classDiagram
             +int id
             +string designation
             +int quantite
+            +int seuil_alerte
             +isLowStock()
+        }
+        class Commande {
+            +int id
+            +string statut
+            +date date_commande
+            +valider()
+        }
+        class Fournisseur {
+            +int id
+            +string nom
+            +string contact
         }
     }
 

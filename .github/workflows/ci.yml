@@ -1,0 +1,48 @@
+name: CI/CD Pipeline Gestion Atelier
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    # On précise que toutes les commandes doivent s'exécuter dans le dossier Laravel
+    defaults:
+      run:
+        working-directory: ./Backend_Frontend
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Configuration de PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_pgsql, pgsql # Important pour PostgreSQL
+
+      - name: Configuration de Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Copie du fichier .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Installation des dépendances Composer (Backend)
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Installation des dépendances NPM et Build (Frontend)
+        run: |
+          npm install
+          npm run build
+
+      - name: Génération de la clé d'application
+        run: php artisan key:generate
+
+      - name: Exécution des tests (PHPUnit)
+        run: php artisan test

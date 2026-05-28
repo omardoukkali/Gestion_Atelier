@@ -25,6 +25,13 @@ class DemandeController extends Controller
         return response()->json($demandes);
     }
 
+
+    public function create()
+    {
+        return inertia('Demandes/Create');
+    }
+
+
     // 2. Enregistrer une nouvelle demande (faite par un employé)
     public function store(Request $request)
     {
@@ -42,6 +49,23 @@ class DemandeController extends Controller
             'employe_id' => Auth::id(), // Récupère l'ID de la personne connectée
         ]);
 
-        return response()->json(['message' => 'Demande créée avec succès', 'demande' => $demande]);
+        return redirect()->route('dashboard')->with('message', 'Demande créée avec succès !');
+    }
+
+    // Accepter une demande
+    public function accepter(Demande $demande)
+    {
+        $demande->update(['statut' => 'acceptee']);
+
+        // back() permet de recharger la page actuelle (le dashboard)
+        return back()->with('message', 'Demande acceptée avec succès.');
+    }
+
+    // Refuser une demande
+    public function refuser(Demande $demande)
+    {
+        $demande->update(['statut' => 'refusee']);
+
+        return back()->with('message', 'Demande refusée.');
     }
 }

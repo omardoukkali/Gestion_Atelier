@@ -55,7 +55,10 @@ Route::middleware('auth')->group(function () {
 // Routes protégées par l'authentification
 Route::middleware('auth')->group(function () {
     Route::get('/demandes', [DemandeController::class, 'index']);
-    Route::post('/demandes', [DemandeController::class, 'store']);
+    Route::get('/demandes/create', [DemandeController::class, 'create'])->name('demandes.create');
+    Route::post('/demandes', [DemandeController::class, 'store'])->name('demandes.store');
+    Route::patch('/demandes/{demande}/accepter', [DemandeController::class, 'accepter'])->name('demandes.accepter');
+    Route::patch('/demandes/{demande}/refuser', [DemandeController::class, 'refuser'])->name('demandes.refuser');
 });
 
 

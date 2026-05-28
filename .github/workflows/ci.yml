@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configuration de PHP 8.2
         uses: shivammathur/setup-php@v2
@@ -25,10 +25,10 @@ jobs:
           php-version: '8.2'
           extensions: pdo_pgsql, pgsql # Important pour PostgreSQL
 
-      - name: Configuration de Node.js 20
-        uses: actions/setup-node@v3
+      - name: Configuration de Node.js 24
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Copie du fichier .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"

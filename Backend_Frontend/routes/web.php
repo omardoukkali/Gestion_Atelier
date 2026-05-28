@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Demande;
+use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -26,7 +28,19 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $user = Auth::user();
+
+    // Logique de filtrage selon le rôle
+    if ($user->role === 'chef_atelier') {
+        $demandes = Demande::with('employe')->latest()->get();
+    } else {
+        $demandes = Demande::where('employe_id', $user->id)->latest()->get();
+    }
+
+    // On envoie les demandes à la vue Vue.js
+    return Inertia::render('Dashboard', [
+        'demandes' => $demandes
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -34,5 +48,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
+
+
+// Routes protégées par l'authentification
+Route::middleware('auth')->group(function () {
+    Route::get('/demandes', [DemandeController::class, 'index']);
+    Route::post('/demandes', [DemandeController::class, 'store']);
+});
+
 
 require __DIR__.'/auth.php';

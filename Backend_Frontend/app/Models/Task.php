@@ -36,5 +36,5 @@ class Task extends Model
     {
         return $this->hasMany(FicheTravail::class, 'tache_id');
     }
-    
+
 }

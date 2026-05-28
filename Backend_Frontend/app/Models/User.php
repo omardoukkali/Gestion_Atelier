@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Task;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -42,4 +43,21 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+// Relation: Un utilisateur (ouvrier) peut avoir plusieurs tâches assignées
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assigne_id');
+    }
+
+    public function demandes()
+    {
+        return $this->hasMany(Demande::class, 'employe_id');
+    }
+
+    public function fichesTravail()
+    {
+        return $this->hasMany(FicheTravail::class, 'ouvrier_id');
+    }
+
 }

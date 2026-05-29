@@ -1,6 +1,8 @@
 <?php
 
+
 use App\Models\Demande;
+use App\Http\Controllers\VehiculeController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -59,6 +61,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/demandes', [DemandeController::class, 'store'])->name('demandes.store');
     Route::patch('/demandes/{demande}/accepter', [DemandeController::class, 'accepter'])->name('demandes.accepter');
     Route::patch('/demandes/{demande}/refuser', [DemandeController::class, 'refuser'])->name('demandes.refuser');
+    // Routes pour les Véhicules
+    Route::get('/vehicules', [VehiculeController::class, 'index'])->name('vehicules.index');
+    Route::get('/vehicules/create', [VehiculeController::class, 'create'])->name('vehicules.create');
+    Route::post('/vehicules', [VehiculeController::class, 'store'])->name('vehicules.store');
 });
 
 

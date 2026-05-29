@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('designation');
             $table->integer('quantite')->default(0);
-            $table->integer('seuil_alerte')->default(5); // Déclenchera l'alerte de stock bas
-            $table->decimal('prix_unitaire', 8, 2); // 8 chiffres au total, dont 2 après la virgule
+            $table->integer('seuil_alerte')->default(5);
+            $table->decimal('prix_unitaire', 10, 2);
 
-            // Clé étrangère vers le fournisseur
-            $table->foreignId('fournisseur_id')->nullable()->constrained('fournisseurs')->nullOnDelete();
+            // La relation avec le fournisseur (clé étrangère)
+            $table->foreignId('fournisseur_id')->constrained('fournisseurs')->onDelete('cascade');
 
             $table->timestamps();
         });

@@ -17,8 +17,7 @@ class Fournisseur extends Model
         'adresse',
     ];
 
-    // Un fournisseur peut fournir plusieurs pièces (HasMany)
-    public function pieces(): HasMany
+    public function stockPieces()
     {
         return $this->hasMany(StockPiece::class);
     }

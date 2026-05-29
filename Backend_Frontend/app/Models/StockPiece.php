@@ -23,4 +23,7 @@ class StockPiece extends Model
     {
         return $this->belongsTo(Fournisseur::class);
     }
+
+
+
 }

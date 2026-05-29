@@ -2,6 +2,8 @@
 
 
 use App\Models\Demande;
+use App\Http\Controllers\StockPieceController;
+use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\VehiculeController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\ProfileController;
@@ -65,6 +67,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/vehicules', [VehiculeController::class, 'index'])->name('vehicules.index');
     Route::get('/vehicules/create', [VehiculeController::class, 'create'])->name('vehicules.create');
     Route::post('/vehicules', [VehiculeController::class, 'store'])->name('vehicules.store');
+    Route::resource('fournisseurs', FournisseurController::class);
+    Route::resource('stock-pieces', StockPieceController::class);
 });
 
 

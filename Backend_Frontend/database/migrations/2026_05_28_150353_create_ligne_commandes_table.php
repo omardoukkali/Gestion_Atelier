@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('ligne_commandes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('commande_id')->constrained('commandes')->cascadeOnDelete();
-            $table->foreignId('stock_piece_id')->constrained('stock_pieces')->cascadeOnDelete();
+            $table->foreignId('commande_id')->constrained('commandes')->onDelete('cascade');
+            $table->foreignId('stock_piece_id')->constrained('stock_pieces')->onDelete('cascade');
             $table->integer('quantite');
             $table->decimal('prix_unitaire', 8, 2);
             $table->timestamps();

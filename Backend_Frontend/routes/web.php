@@ -2,6 +2,9 @@
 
 
 use App\Models\Demande;
+use App\Http\Controllers\FicheTravailController;
+use App\Http\Controllers\LivraisonController;
+use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\StockPieceController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\VehiculeController;
@@ -69,6 +72,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/vehicules', [VehiculeController::class, 'store'])->name('vehicules.store');
     Route::resource('fournisseurs', FournisseurController::class);
     Route::resource('stock-pieces', StockPieceController::class);
+    Route::resource('commandes', CommandeController::class);
+    Route::resource('livraisons', LivraisonController::class)->only(['index', 'store']);
+    Route::resource('fiches-travail', FicheTravailController::class)->only(['create', 'store']);
 });
 
 

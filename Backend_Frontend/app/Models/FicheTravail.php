@@ -29,4 +29,13 @@ class FicheTravail extends Model
     {
         return $this->belongsTo(User::class, 'ouvrier_id');
     }
+
+    // Relation vers les pièces consommées (Table Pivot)
+    public function pieces()
+    {
+        return $this->belongsToMany(StockPiece::class, 'fiche_travail_stock_piece')
+            ->withPivot('quantite')
+            ->withTimestamps();
+    }
+
 }

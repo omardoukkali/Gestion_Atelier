@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('commandes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('chef_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('fournisseur_id')->constrained('fournisseurs')->cascadeOnDelete();
+            $table->foreignId('chef_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('fournisseur_id')->constrained('fournisseurs')->onDelete('cascade');
             $table->enum('statut', ['en_attente', 'validee', 'livree', 'annulee'])->default('en_attente');
             $table->dateTime('date_commande')->useCurrent();
             $table->timestamps();

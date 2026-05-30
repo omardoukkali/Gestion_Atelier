@@ -24,6 +24,10 @@ class StockPiece extends Model
         return $this->belongsTo(Fournisseur::class);
     }
 
-
+    public function fichesTravail() {
+        return $this->belongsToMany(FicheTravail::class, 'fiche_travail_stock_piece')
+            ->withPivot('quantite')
+            ->withTimestamps();
+    }
 
 }

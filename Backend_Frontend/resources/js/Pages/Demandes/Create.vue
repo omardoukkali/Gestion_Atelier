@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link } from '@inertiajs/vue3';
 
 // Initialisation du formulaire
 const form = useForm({
@@ -61,7 +61,9 @@ const submit = () => {
                         </div>
 
                         <div class="flex items-center justify-end mt-4 gap-4">
-                            <a :href="route('dashboard')" class="text-gray-600 hover:underline">Annuler</a>
+                            <Link :href="route('demandes.index')" class="text-gray-600 hover:underline">
+                                Annuler
+                            </Link>
 
                             <button
                                 type="submit"

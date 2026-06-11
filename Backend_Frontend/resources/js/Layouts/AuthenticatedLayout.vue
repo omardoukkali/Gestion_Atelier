@@ -29,11 +29,26 @@ const showingNavigationDropdown = ref(false);
 
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                <NavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
-                                <NavLink :href="route('vehicules.index')" :active="route().current('vehicules.*')">
+                                <NavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('tasks.create')" :active="route().current('tasks.create')">
+                                    + Assigner une Tâche
+                                </NavLink>
+                                <NavLink v-if="['chef_atelier', 'employe'].includes($page.props.auth.user.role)" :href="route('vehicules.index')" :active="route().current('vehicules.*')">
                                     Véhicules
+                                </NavLink>
+                                <NavLink v-if="['chef_atelier', 'employe'].includes($page.props.auth.user.role)" :href="route('demandes.index')" :active="route().current('demandes.*')">
+                                    Demandes
+                                </NavLink>
+                                <NavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('stock-pieces.index')" :active="route().current('stock-pieces.index')">
+                                    Stock des Pièces
+                                </NavLink>
+                                <NavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('fiches-travail.create')" :active="route().current('fiches-travail.create')">
+                                    Nouvelle Fiche de Travail
+                                </NavLink>
+                                <NavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('tasks.index')" :active="route().current('tasks.index')">
+                                    Liste des Tâches
                                 </NavLink>
                             </div>
                         </div>
@@ -115,8 +130,26 @@ const showingNavigationDropdown = ref(false);
                     class="sm:hidden"
                 >
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="['chef_atelier', 'employe'].includes($page.props.auth.user.role)" :href="route('vehicules.index')" :active="route().current('vehicules.*')">
+                            Véhicules
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="['chef_atelier', 'employe'].includes($page.props.auth.user.role)" :href="route('demandes.index')" :active="route().current('demandes.*')">
+                            Demandes
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('tasks.create')" :active="route().current('tasks.create')">
+                            + Assigner une Tâche
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('stock-pieces.index')" :active="route().current('stock-pieces.index')">
+                            Stock des Pièces
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('fiches-travail.create')" :active="route().current('fiches-travail.create')">
+                            Nouvelle Fiche de Travail
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('tasks.index')" :active="route().current('tasks.index')">
+                            Liste des Tâches
                         </ResponsiveNavLink>
                     </div>
 

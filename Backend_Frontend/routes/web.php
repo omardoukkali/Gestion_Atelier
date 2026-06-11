@@ -2,6 +2,7 @@
 
 
 use App\Models\Demande;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\FicheTravailController;
 use App\Http\Controllers\LivraisonController;
 use App\Http\Controllers\CommandeController;
@@ -61,6 +62,24 @@ Route::middleware('auth')->group(function () {
 
 // Routes protégées par l'authentification
 Route::middleware('auth')->group(function () {
+    // L'Aiguilleur (Smart Dashboard)
+    Route::get('/dashboard', function () {
+        $role = auth()->user()->role;
+
+        if ($role === 'chef_atelier') {
+            // Le chef a accès au vrai tableau de bord
+            return Inertia::render('Dashboard');
+        } elseif ($role === 'ouvrier') {
+            // L'ouvrier est redirigé vers sa liste de tâches du jour
+            return redirect()->route('tasks.index');
+        } elseif ($role === 'employe') {
+            // L'employé est redirigé vers la gestion des véhicules
+            return redirect()->route('vehicules.index');
+        }
+
+        // Par sécurité
+        abort(403);
+    })->name('dashboard');
     Route::get('/demandes', [DemandeController::class, 'index']);
     Route::get('/demandes/create', [DemandeController::class, 'create'])->name('demandes.create');
     Route::post('/demandes', [DemandeController::class, 'store'])->name('demandes.store');
@@ -75,6 +94,44 @@ Route::middleware('auth')->group(function () {
     Route::resource('commandes', CommandeController::class);
     Route::resource('livraisons', LivraisonController::class)->only(['index', 'store']);
     Route::resource('fiches-travail', FicheTravailController::class)->only(['create', 'store']);
+    Route::resource('tasks', TaskController::class)->only(['index', 'create', 'store']);
+    // 1. Routes accessibles uniquement par le CHEF D'ATELIER
+    Route::middleware(['role:chef_atelier'])->group(function () {
+      //  Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->name('dashboard');
+        Route::patch('/demandes/{demande}/accepter', [DemandeController::class, 'accepter'])->name('demandes.accepter');
+        Route::patch('/demandes/{demande}/refuser', [DemandeController::class, 'refuser'])->name('demandes.refuser');
+        Route::resource('tasks', TaskController::class)->only(['create', 'store']);
+        Route::patch('/ligne-devis/{ligneDevis}/valider', [LigneDevisController::class, 'valider'])->name('ligne-devis.valider');
+        Route::patch('/ligne-devis/{ligneDevis}/refuser', [LigneDevisController::class, 'refuser'])->name('ligne-devis.refuser');
+        // Route::resource('vehicules', VehicleController::class);
+    });
+
+    // 2. Routes accessibles par l'OUVRIER (et le chef d'atelier par confort si besoin)
+    Route::middleware(['role:ouvrier,chef_atelier'])->group(function () {
+        Route::resource('tasks', TaskController::class)->only(['index']); // Consulter ses tâches
+        Route::resource('fiches-travail', FicheTravailController::class)->only(['create', 'store']);
+        Route::get('/stock-pieces', [StockPieceController::class, 'index'])->name('stock-pieces.index');
+    });
+    // 3. Routes de l'EMPLOYÉ
+    Route::middleware(['role:employe,chef_atelier'])->group(function () {
+        // Tes futures routes pour soumettre une demande de tâche (UC1 / UC2)
+        Route::resource('demandes', DemandeController::class)->only(['index', 'create', 'store']);
+    });
+
+    // 4. Routes pour Ouvrier
+
+    Route::middleware(['role:ouvrier'])->group(function () {
+        // ... tes autres routes ouvrier s'il y en a ...
+
+        // Actions sur les tâches
+        Route::patch('/tasks/{task}/start', [TaskController::class, 'start'])->name('tasks.start');
+        Route::patch('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
+        Route::post('/tasks/{task}/devis', [LigneDevisController::class, 'store'])->name('ligne-devis.store');
+    });
+
+    // la route pour la gestion des véhicules
+    Route::resource('vehicule', VehicleController::class);
+
 });
 
 

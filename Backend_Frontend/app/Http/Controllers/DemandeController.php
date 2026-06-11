@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Demande;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class DemandeController extends Controller
 {
@@ -21,8 +22,9 @@ class DemandeController extends Controller
             $demandes = Demande::where('employe_id', $user->id)->latest()->get();
         }
 
-        // Plus tard, on enverra ça à Vue.js ou Blade. Pour l'instant on retourne du JSON pour tester.
-        return response()->json($demandes);
+        return Inertia::render('Demandes/Index', [
+            'demandes' => $demandes
+        ]);
     }
 
 
@@ -49,7 +51,8 @@ class DemandeController extends Controller
             'employe_id' => Auth::id(), // Récupère l'ID de la personne connectée
         ]);
 
-        return redirect()->route('dashboard')->with('message', 'Demande créée avec succès !');
+        // On redirige vers la liste des demandes plutôt que le dashboard
+        return redirect()->route('demandes.index')->with('message', 'Demande créée avec succès !');
     }
 
     // Accepter une demande

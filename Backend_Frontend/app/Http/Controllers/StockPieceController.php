@@ -11,9 +11,10 @@ class StockPieceController extends Controller
 {
     public function index()
     {
-        // On récupère les pièces avec les infos du fournisseur associé
-        $pieces = StockPiece::with('fournisseur')->latest()->get();
+        // 1. On crée la variable $pieces et on va chercher les données
+        $pieces = StockPiece::with('fournisseur')->orderBy('designation', 'asc')->get();
 
+        // 2. On envoie cette même variable $pieces à la vue
         return Inertia::render('StockPieces/Index', [
             'pieces' => $pieces
         ]);

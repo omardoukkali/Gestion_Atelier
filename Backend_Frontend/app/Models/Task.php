@@ -37,4 +37,10 @@ class Task extends Model
         return $this->hasMany(FicheTravail::class, 'tache_id');
     }
 
+    // Les pièces demandées en devis pour cette tâche
+    public function lignesDevis()
+    {
+        return $this->hasMany(LigneDevis::class, 'tache_id');
+    }
+
 }

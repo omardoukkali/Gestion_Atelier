@@ -30,4 +30,10 @@ class StockPiece extends Model
             ->withTimestamps();
     }
 
+    // Les devis dans lesquels cette pièce est demandée
+    public function lignesDevis()
+    {
+        return $this->hasMany(LigneDevis::class, 'stock_piece_id');
+    }
+
 }

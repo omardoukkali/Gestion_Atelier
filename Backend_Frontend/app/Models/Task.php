@@ -15,6 +15,7 @@ class Task extends Model
         'statut',
         'priorite',
         'description',
+        'compte_rendu',
         'vehicle_id',
         'assigne_id',
     ];

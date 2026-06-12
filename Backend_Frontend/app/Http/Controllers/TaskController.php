@@ -69,10 +69,30 @@ class TaskController extends Controller
     }
 
     // Terminer une tâche (Ouvrier)
-    public function complete(Task $task)
+    public function complete(Request $request, Task $task)
     {
-        $task->update(['statut' => 'terminee']);
-        return back()->with('message', 'Félicitations, tâche terminée !');
+        // 1. Validation : Le compte-rendu est obligatoire et doit faire au moins 10 caractères
+        $validated = $request->validate([
+            'compte_rendu' => 'required|string|min:10',
+        ], [
+            'compte_rendu.required' => 'Vous devez obligatoirement fournir un compte-rendu pour terminer la tâche.',
+            'compte_rendu.min' => 'Le compte-rendu doit être plus détaillé (minimum 10 caractères).'
+        ]);
+
+        // 2. Sécurité : On revérifie qu'aucune pièce n'est restée en attente
+        $aDesPiecesEnAttente = $task->lignesDevis()->where('statut', 'en_attente')->exists();
+        if ($aDesPiecesEnAttente) {
+            return back()->with('error', "Impossible de terminer : une demande de matériel est en attente.");
+        }
+
+        // 3. Mise à jour de la tâche avec le statut et le rapport de l'ouvrier
+        $task->update([
+            'statut' => 'terminee',
+            'compte_rendu' => $validated['compte_rendu'], // On sauvegarde le texte
+            'fin_tache' => now() // Optionnel : pour stocker la date de fin
+        ]);
+
+        return back()->with('message', "La tâche #{$task->id} a été clôturée avec succès avec votre compte-rendu !");
     }
 
 

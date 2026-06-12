@@ -24,23 +24,34 @@ const statusClass = (s) => {
     return 'bg-gray-100 text-gray-600';
 };
 
-// --- NOUVEAU : Couleurs pour le statut des pièces du devis ---
+// --- Couleurs pour le statut des pièces du devis ---
 const devisStatusClass = (s) => {
     if (s === 'validee') return 'bg-green-100 text-green-700 font-bold';
     if (s === 'refusee') return 'bg-red-100 text-red-700';
     return 'bg-amber-100 text-amber-700 animate-pulse';
 };
 
+// --- NOUVEAU : Vérifie si une tâche a des pièces en attente ---
+const aDesPiecesEnAttente = (task) => {
+    if (!task.lignes_devis) return false;
+    return task.lignes_devis.some(ligne => ligne.statut === 'en_attente');
+};
+
 // --- Formulaires ---
 const formStatus = useForm({});
-const formActionDevis = useForm({}); // Formulaire pour valider/refuser une ligne
+
+// 🛒 MODIFIÉ : Formulaire pour valider/refuser une ligne (inclut la quantité)
+const formActionDevis = useForm({
+    quantite: 1
+});
 
 const updateTaskStatus = (id, action) => {
     formStatus.patch(route(`tasks.${action}`, id), { preserveScroll: true });
 };
 
-// Gestion des actions du Chef sur le devis
-const validerLigne = (ligneId) => {
+// 🛠️ MODIFIÉ : Gestion des actions du Chef sur le devis avec la quantité modifiée
+const validerLigne = (ligneId, quantiteModifiee) => {
+    formActionDevis.quantite = quantiteModifiee; // On injecte la quantité saisie dans le formulaire
     formActionDevis.patch(route('ligne-devis.valider', ligneId), { preserveScroll: true });
 };
 
@@ -71,6 +82,34 @@ const submitDevis = () => {
         onSuccess: () => closeDevisModal(),
     });
 };
+
+
+// États pour la modale de compte-rendu
+const showReportModal = ref(false);
+const selectedTaskIdForReport = ref(null);
+
+// Formulaire Inertia pour envoyer le compte-rendu
+const reportForm = useForm({
+    compte_rendu: ''
+});
+
+// Fonction déclenchée lors du clic sur le bouton vert "Terminer"
+const ouvrirModaleCompteRendu = (taskId) => {
+    selectedTaskIdForReport.value = taskId;
+    reportForm.compte_rendu = ''; // On vide le champ
+    showReportModal.value = true;  // On affiche la modale
+};
+
+// Fonction qui soumet le compte-rendu au backend
+const soumettreFinTache = () => {
+    reportForm.patch(route('tasks.complete', selectedTaskIdForReport.value), {
+        onSuccess: () => {
+            showReportModal.value = false; // Ferme la modale si succès
+            reportForm.reset();
+        }
+    });
+};
+
 </script>
 
 <template>
@@ -131,7 +170,7 @@ const submitDevis = () => {
                             <td class="px-6 py-4 flex gap-2" v-if="$page.props.auth.user.role === 'ouvrier'">
                                 <button v-if="task.statut === 'en_attente'" @click="updateTaskStatus(task.id, 'start')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold" :disabled="formStatus.processing">▶ Démarrer</button>
                                 <button v-if="task.statut === 'en_cours'" @click="openDevisModal(task.id)" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-xs font-bold shadow-sm">🔧 Matériel</button>
-                                <button v-if="task.statut === 'en_cours'" @click="updateTaskStatus(task.id, 'complete')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-bold" :disabled="formStatus.processing">✔ Terminer</button>
+                                <button v-if="task.statut === 'en_cours'" @click="ouvrirModaleCompteRendu(task.id)" :class="['px-3 py-1 rounded text-xs font-bold transition-all',aDesPiecesEnAttente(task) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600 text-white']" :disabled="formStatus.processing || aDesPiecesEnAttente(task)" :title="aDesPiecesEnAttente(task) ? 'Impossible de terminer : attente de validation par le chef' : ''">✔ Terminer</button>
                             </td>
                         </tr>
 
@@ -139,6 +178,16 @@ const submitDevis = () => {
                             <td colspan="7" class="px-8 py-3 text-xs border-b border-gray-200">
                                 <div class="mb-2"><strong class="text-gray-700">Description :</strong> <span class="text-gray-600">{{ task.description }}</span></div>
 
+                                <div v-if="task.statut === 'terminee' && task.compte_rendu" class="mt-3 mb-3 p-3 bg-green-50 border-l-4 border-green-500 rounded-r shadow-sm max-w-2xl">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-green-700 font-bold text-xs uppercase tracking-wider">
+                                            📝 Compte-rendu de clôture
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-green-900 italic">
+                                        "{{ task.compte_rendu }}"
+                                    </p>
+                                </div>
                                 <div v-if="task.lignes_devis && task.lignes_devis.length > 0" class="mt-3 bg-white p-3 rounded border border-gray-200 max-w-2xl">
                                     <h4 class="font-bold text-gray-700 mb-2 flex items-center gap-1">🛠️ Pièces demandées pour cette tâche :</h4>
                                     <div class="space-y-2">
@@ -153,9 +202,23 @@ const submitDevis = () => {
                                                     {{ ligne.statut.replace('_', ' ') }}
                                                 </span>
 
-                                                <div v-if="$page.props.auth.user.role === 'chef_atelier' && ligne.statut === 'en_attente'" class="flex gap-1">
-                                                    <button @click="validerLigne(ligne.id)" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]" :disabled="formActionDevis.processing">✔ Valider</button>
-                                                    <button @click="refuserLigne(ligne.id)" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]" :disabled="formActionDevis.processing">❌ Refuser</button>
+                                                <div v-if="$page.props.auth.user.role === 'chef_atelier' && ligne.statut === 'en_attente'" class="flex items-center gap-2">
+                                                    <div class="flex items-center bg-gray-100 px-1.5 py-0.5 rounded border border-gray-300">
+                                                        <span class="text-[10px] text-gray-500 font-bold mr-1">Qté:</span>
+                                                        <input
+                                                            type="number"
+                                                            v-model="ligne.quantite"
+                                                            min="1"
+                                                            class="w-12 p-0 text-xs border-0 bg-transparent focus:ring-0 text-center font-bold text-indigo-700"
+                                                        />
+                                                    </div>
+
+                                                    <button @click="validerLigne(ligne.id, ligne.quantite)" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]" :disabled="formActionDevis.processing">
+                                                        ✔ Valider
+                                                    </button>
+                                                    <button @click="refuserLigne(ligne.id)" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]" :disabled="formActionDevis.processing">
+                                                        ❌ Refuser
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -200,4 +263,46 @@ const submitDevis = () => {
             </div>
         </div>
     </AuthenticatedLayout>
+
+    <div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 text-slate-800">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">📝 Rapport de fin de tâche</h3>
+            <p class="text-sm text-gray-600 mb-4">
+                Expliquez brièvement les actions réalisées (surtout si des pièces ont été refusées) pour clore le dossier du véhicule.
+            </p>
+
+            <form @submit.prevent="soumettreFinTache">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Votre compte-rendu :</label>
+                    <textarea
+                        v-model="reportForm.compte_rendu"
+                        rows="4"
+                        class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                        placeholder="Ex: Nettoyage des plaquettes existantes effectué, le freinage est à nouveau fonctionnel sans remplacement..."
+                        required
+                    ></textarea>
+                    <div v-if="reportForm.errors.compte_rendu" class="text-red-500 text-xs mt-1">
+                        {{ reportForm.errors.compte_rendu }}
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button
+                        type="button"
+                        @click="showReportModal = false"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="reportForm.processing"
+                        class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50"
+                    >
+                        {{ reportForm.processing ? 'Envoi...' : 'Valider et Clôturer' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </template>

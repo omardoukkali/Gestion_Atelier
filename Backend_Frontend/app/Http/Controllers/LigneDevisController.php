@@ -8,6 +8,7 @@ use App\Models\LigneDevis;
 use Illuminate\Http\Request;
 use App\Models\Commande;
 
+
 class LigneDevisController extends Controller
 {
     /**
@@ -37,27 +38,30 @@ class LigneDevisController extends Controller
     }
 
 
-    public function valider(LigneDevis $ligneDevis)
+    public function valider(Request $request, LigneDevis $ligneDevis)
     {
-        // 1. On passe la ligne de devis en "validée"
-        $ligneDevis->update(['statut' => 'validee']);
-
-        // 2. On récupère la pièce pour connaître son fournisseur
-        $piece = $ligneDevis->piece;
-
-        // 3. AUTOMATISATION : Transformation du devis en Bon de Commande
-        // (On crée la commande pour le fournisseur de la pièce)
-        $commande = Commande::create([
-            'fournisseur_id' => $piece->fournisseur_id,
-            'statut' => 'envoyee', // Directement marquée comme envoyée selon ton diagramme
-            'date_commande' => now(),
-            // Ajoute ici les autres champs obligatoires de ta table commandes si tu en as (ex: total, ref...)
+        // 1. On valide la quantité envoyée par le chef (sécurité)
+        $validated = $request->validate([
+            'quantite' => 'required|integer|min:1'
         ]);
 
-        // 4. [Optionnel] Si tu as une table pivot entre Commande et StockPiece, tu enregistres la ligne ici.
+        // 2. On met à jour le statut ET la quantité (qu'elle ait changé ou non !)
+        $ligneDevis->update([
+            'statut' => 'validee',
+            'quantite' => $validated['quantite']
+        ]);
 
-        // 5. Confirmation au Chef d'Atelier
-        return back()->with('message', "Devis validé ! Le Bon de Commande #{$commande->id} a été généré et envoyé à {$piece->fournisseur->nom}.");
+        // 3. AUTOMATISATION : Transformation automatique en Bon de Commande
+        $piece = $ligneDevis->piece;
+        $commande = Commande::create([
+            'fournisseur_id' => $piece->fournisseur_id,
+            'chef_id'        => auth()->id(),
+            'statut' => 'validee', // Marqué comme envoyé selon ton UML
+            'date_commande' => now(),
+        ]);
+
+        // 4. Message flash de confirmation avec le récapitulatif
+        return back()->with('message', "Le devis pour la pièce '{$piece->designation}' a été validé (Quantité fixée à : {$validated['quantite']}). Le Bon de Commande #{$commande->id} a été généré et envoyé à {$piece->fournisseur->nom}.");
     }
 
     /**

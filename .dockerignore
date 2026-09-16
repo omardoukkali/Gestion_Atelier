@@ -1,0 +1,9 @@
+Backend_Frontend/node_modules
+Backend_Frontend/vendor
+Backend_Frontend/public/build
+Backend_Frontend/.git
+Backend_Frontend/storage/logs
+DevOps
+node_modules
+vendor
+.git

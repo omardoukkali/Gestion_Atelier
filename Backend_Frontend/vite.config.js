@@ -22,8 +22,7 @@ export default defineConfig({
         port: 5173,            // internal port (container side)
         strictPort: true,
         hmr: {
-            host: 'localhost',
-            port: 5174,        // the HOST port your browser connects to
+            host: 'localhost', // le navigateur se connecte ici
         },
         watch: {
             usePolling: true,  // needed for file changes to be detected on Windows/Docker

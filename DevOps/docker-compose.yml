@@ -49,15 +49,17 @@ services:
 
   # 4. Conteneur Node.js (Compilation Vue.js / Vite)
   node:
-    image: node:20-alpine
-    profiles: ["dev"]
+    build:
+      context: ..
+      dockerfile: DevOps/node/Dockerfile
+    profiles: [ "dev" ]
     container_name: atelier_node
     working_dir: /var/www
     volumes:
       - ../Backend_Frontend:/var/www
+      - /var/www/node_modules
     ports:
-      - "5174:5173"
-    command: "npm run dev -- --host"
+      - "5173:5173"
     networks:
       - atelier_network
 

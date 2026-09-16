@@ -1,20 +1,26 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
+import { watch } from 'vue';
 
-// Initialisation du formulaire
+const props = defineProps({
+    vehicules: { type: Array, default: () => [] },
+});
+
 const form = useForm({
     type: '',
+    vehicle_id: '',
     description: '',
 });
 
-// Fonction pour envoyer les données au backend
+watch(() => form.type, (nouveauType) => {
+    if (nouveauType !== 'entretien') {
+        form.vehicle_id = '';
+    }
+});
+
 const submit = () => {
-    form.post(route('demandes.store'), {
-        onSuccess: () => {
-            // Optionnel : tu pourrais ajouter un message flash de succès ici
-        }
-    });
+    form.post(route('demandes.store'));
 };
 </script>
 
@@ -45,6 +51,25 @@ const submit = () => {
                                 <option value="fabrication">Fabrication</option>
                             </select>
                             <div v-if="form.errors.type" class="text-red-600 text-sm mt-1">{{ form.errors.type }}</div>
+                        </div>
+
+                        <!-- Véhicule : affiché uniquement pour un entretien -->
+                        <div v-if="form.type === 'entretien'">
+                            <label for="vehicle_id" class="block text-sm font-medium text-gray-700">Véhicule concerné</label>
+                            <select
+                                id="vehicle_id"
+                                v-model="form.vehicle_id"
+                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            >
+                                <option value="" disabled>Choisissez un véhicule...</option>
+                                <option v-for="v in vehicules" :key="v.id" :value="v.id">
+                                    {{ v.immatriculation }} — {{ v.marque }} {{ v.modele }}
+                                </option>
+                            </select>
+                            <div v-if="form.errors.vehicle_id" class="text-red-600 text-sm mt-1">{{ form.errors.vehicle_id }}</div>
+                            <p v-if="vehicules.length === 0" class="text-amber-600 text-sm mt-1">
+                                Aucun véhicule enregistré. Ajoutez-en un d'abord dans la section Véhicules.
+                            </p>
                         </div>
 
                         <div>

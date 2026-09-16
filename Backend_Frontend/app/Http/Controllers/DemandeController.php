@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Demande;
+use App\Models\Task;
+use App\Models\User;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DemandeController extends Controller
@@ -13,55 +17,90 @@ class DemandeController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $isChef = $user->role === 'chef_atelier';
 
-        if ($user->role === 'chef_atelier') {
-            // Le chef voit toutes les demandes
+        if ($isChef) {
             $demandes = Demande::with('employe')->latest()->get();
         } else {
-            // L'employé ne voit que ses propres demandes
             $demandes = Demande::where('employe_id', $user->id)->latest()->get();
         }
 
         return Inertia::render('Demandes/Index', [
-            'demandes' => $demandes
+            'demandes' => $demandes,
+            // Envoyés seulement au chef, pour le formulaire d'acceptation
+            'ouvriers' => $isChef
+                ? User::where('role', 'ouvrier')->get(['id', 'name'])
+                : [],
+            'vehicules' => $isChef
+                ? Vehicle::get(['id', 'immatriculation', 'marque', 'modele'])
+                : [],
         ]);
     }
 
-
     public function create()
     {
-        return inertia('Demandes/Create');
+        return inertia('Demandes/Create', [
+            'vehicules' => Vehicle::get(['id', 'immatriculation', 'marque', 'modele']),
+        ]);
     }
-
 
     // 2. Enregistrer une nouvelle demande (faite par un employé)
     public function store(Request $request)
     {
-        // On vérifie que les données envoyées sont correctes
         $validated = $request->validate([
-            'type' => 'required|in:entretien,fabrication',
+            'type'        => 'required|in:entretien,fabrication',
             'description' => 'required|string|max:1000',
+            // Obligatoire seulement si c'est un entretien, sinon facultatif
+            'vehicle_id'  => 'required_if:type,entretien|nullable|exists:vehicles,id',
+        ], [
+            'vehicle_id.required_if' => 'Le véhicule est obligatoire pour une demande d\'entretien.',
         ]);
 
-        // On crée la demande et on l'associe à l'employé connecté
-        $demande = Demande::create([
-            'type' => $validated['type'],
+        Demande::create([
+            'type'        => $validated['type'],
             'description' => $validated['description'],
-            'statut' => 'en_attente',
-            'employe_id' => Auth::id(), // Récupère l'ID de la personne connectée
+            'vehicle_id'  => $validated['vehicle_id'] ?? null,
+            'statut'      => 'en_attente',
+            'employe_id'  => Auth::id(),
         ]);
 
-        // On redirige vers la liste des demandes plutôt que le dashboard
         return redirect()->route('demandes.index')->with('message', 'Demande créée avec succès !');
     }
 
-    // Accepter une demande
-    public function accepter(Demande $demande)
+    // 3. Accepter une demande => créer une tâche affectée à un ouvrier
+    public function accepter(Request $request, Demande $demande)
     {
-        $demande->update(['statut' => 'acceptee']);
+        // Sécurité : on ne traite qu'une demande encore en attente
+        if ($demande->statut !== 'en_attente') {
+            return back()->with('error', 'Cette demande a déjà été traitée.');
+        }
 
-        // back() permet de recharger la page actuelle (le dashboard)
-        return back()->with('message', 'Demande acceptée avec succès.');
+        $validated = $request->validate([
+            'assigne_id' => 'required|exists:users,id',
+            'priorite'   => 'required|in:basse,normale,haute,urgente',
+            'vehicle_id' => 'nullable|exists:vehicles,id',
+        ], [
+            'assigne_id.required' => 'Vous devez affecter la tâche à un ouvrier.',
+            'priorite.required'   => 'Vous devez définir une priorité.',
+        ]);
+
+        DB::transaction(function () use ($demande, $validated) {
+            // a) Création de la tâche à partir de la demande
+            Task::create([
+                'demande_id'  => $demande->id,
+                'type'        => $demande->type,
+                'description' => $demande->description,
+                'statut'      => 'en_attente',
+                'priorite'    => $validated['priorite'],
+                'assigne_id'  => $validated['assigne_id'],
+                'vehicle_id'  => $validated['vehicle_id'] ?? null,
+            ]);
+
+            // b) La demande passe à "acceptée"
+            $demande->update(['statut' => 'acceptee']);
+        });
+
+        return back()->with('message', "Demande acceptée : la tâche a été créée et affectée à l'ouvrier.");
     }
 
     // Refuser une demande

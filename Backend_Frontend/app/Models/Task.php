@@ -44,4 +44,10 @@ class Task extends Model
         return $this->hasMany(LigneDevis::class, 'tache_id');
     }
 
+    // Une tâche peut provenir d'une demande d'employé
+    public function demande(): BelongsTo
+    {
+        return $this->belongsTo(Demande::class);
+    }
+
 }

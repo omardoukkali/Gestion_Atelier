@@ -22,4 +22,16 @@ class Demande extends Model
     {
         return $this->belongsTo(User::class, 'employe_id');
     }
+    // Une demande acceptée donne lieu à une tâche
+    public function tache()
+    {
+        return $this->hasOne(Task::class);
+    }
+
+    // Une demande peut concerner un véhicule (entretien)
+    public function vehicle(): BelongsTo
+    {
+        return $this->belongsTo(Vehicle::class);
+    }
+
 }

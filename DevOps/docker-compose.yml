@@ -1,14 +1,18 @@
-version: '3.8'
+
 
 services:
   # 1. Conteneur PHP (Backend Laravel)
   app:
-    image: php:8.2-fpm
+    build:
+      context: ./php
+      dockerfile: Dockerfile
     container_name: atelier_app
     restart: unless-stopped
     working_dir: /var/www
     volumes:
       - ../Backend_Frontend:/var/www
+      - atelier_vendor:/var/www/vendor
+      - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
     networks:
       - atelier_network
 
@@ -18,7 +22,7 @@ services:
     container_name: atelier_webserver
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "8001:80"
     volumes:
       - ../Backend_Frontend:/var/www
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -33,7 +37,7 @@ services:
     container_name: atelier_db
     restart: unless-stopped
     ports:
-      - "5433:5432"
+      - "5436:5432"
     environment:
       POSTGRES_DB: gestion_atelier
       POSTGRES_USER: root
@@ -51,7 +55,7 @@ services:
     volumes:
       - ../Backend_Frontend:/var/www
     ports:
-      - "5173:5173"
+      - "5174:5173"
     command: "npm run dev -- --host"
     networks:
       - atelier_network
@@ -62,3 +66,4 @@ networks:
 
 volumes:
   db_data:
+  atelier_vendor:

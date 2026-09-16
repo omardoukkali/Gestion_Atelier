@@ -50,6 +50,7 @@ services:
   # 4. Conteneur Node.js (Compilation Vue.js / Vite)
   node:
     image: node:20-alpine
+    profiles: ["dev"]
     container_name: atelier_node
     working_dir: /var/www
     volumes:

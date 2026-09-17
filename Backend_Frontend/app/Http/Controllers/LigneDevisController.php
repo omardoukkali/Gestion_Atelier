@@ -7,6 +7,8 @@ use App\Models\StockPiece;
 use App\Models\LigneDevis;
 use Illuminate\Http\Request;
 use App\Models\Commande;
+use App\Models\LigneCommande;
+use Illuminate\Support\Facades\DB;
 
 
 class LigneDevisController extends Controller
@@ -45,23 +47,38 @@ class LigneDevisController extends Controller
             'quantite' => 'required|integer|min:1'
         ]);
 
-        // 2. On met à jour le statut ET la quantité (qu'elle ait changé ou non !)
-        $ligneDevis->update([
-            'statut' => 'validee',
-            'quantite' => $validated['quantite']
-        ]);
-
-        // 3. AUTOMATISATION : Transformation automatique en Bon de Commande
         $piece = $ligneDevis->piece;
-        $commande = Commande::create([
-            'fournisseur_id' => $piece->fournisseur_id,
-            'chef_id'        => auth()->id(),
-            'statut' => 'validee', // Marqué comme envoyé selon ton UML
-            'date_commande' => now(),
-        ]);
+        $commande = null;
 
-        // 4. Message flash de confirmation avec le récapitulatif
-        return back()->with('message', "Le devis pour la pièce '{$piece->designation}' a été validé (Quantité fixée à : {$validated['quantite']}). Le Bon de Commande #{$commande->id} a été généré et envoyé à {$piece->fournisseur->nom}.");
+        // On enveloppe tout dans une transaction : soit tout réussit, soit rien
+        DB::transaction(function () use ($ligneDevis, $validated, $piece, &$commande) {
+
+            // 2. Mettre à jour le statut ET la quantité de la ligne de devis
+            $ligneDevis->update([
+                'statut'   => 'validee',
+                'quantite' => $validated['quantite'],
+            ]);
+
+            // 3. Créer le Bon de Commande — statut "en_attente" pour qu'il
+            //    apparaisse dans la page Livraisons (réception à venir)
+            $commande = Commande::create([
+                'fournisseur_id' => $piece->fournisseur_id,
+                'chef_id'        => auth()->id(),
+                'statut'         => 'en_attente',
+                'date_commande'  => now(),
+            ]);
+
+            // 4. Créer la LIGNE de commande (c'est elle qui réapprovisionnera le stock)
+            LigneCommande::create([
+                'commande_id'    => $commande->id,
+                'stock_piece_id' => $piece->id,
+                'quantite'       => $validated['quantite'],
+                'prix_unitaire'  => $ligneDevis->prix_unitaire,
+            ]);
+        });
+
+        // 5. Message de confirmation
+        return back()->with('message', "Devis validé pour '{$piece->designation}' (Quantité : {$validated['quantite']}). Bon de Commande #{$commande->id} généré et envoyé à {$piece->fournisseur->nom}. En attente de livraison.");
     }
 
     /**

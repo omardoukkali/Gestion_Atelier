@@ -90,7 +90,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/vehicules', [VehiculeController::class, 'index'])->name('vehicules.index');
     Route::get('/vehicules/create', [VehiculeController::class, 'create'])->name('vehicules.create');
     Route::post('/vehicules', [VehiculeController::class, 'store'])->name('vehicules.store');
-    Route::resource('fournisseurs', FournisseurController::class);
     Route::resource('stock-pieces', StockPieceController::class);
     Route::resource('commandes', CommandeController::class);
     Route::resource('livraisons', LivraisonController::class)->only(['index', 'store']);
@@ -105,6 +104,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('/ligne-devis/{ligneDevis}/valider', [LigneDevisController::class, 'valider'])->name('ligne-devis.valider');
         Route::patch('/ligne-devis/{ligneDevis}/refuser', [LigneDevisController::class, 'refuser'])->name('ligne-devis.refuser');
         // Route::resource('vehicules', VehicleController::class);
+        // Gestion des fournisseurs — réservée au chef
+        Route::resource('fournisseurs', FournisseurController::class)->only(['index', 'create', 'store']);
     });
 
     // 2. Routes accessibles par l'OUVRIER (et le chef d'atelier par confort si besoin)

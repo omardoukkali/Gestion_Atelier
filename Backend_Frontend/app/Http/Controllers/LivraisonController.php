@@ -67,6 +67,6 @@ class LivraisonController extends Controller
             }
         });
 
-        return redirect()->route('livraisons.index')->with('message', 'Livraison enregistrée avec succès !');
+        return redirect()->route('livraisons.index')->with('message', 'Livraisons enregistrée avec succès !');
     }
 }

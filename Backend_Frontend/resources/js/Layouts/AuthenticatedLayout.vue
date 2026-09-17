@@ -47,6 +47,12 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('fiches-travail.create')" :active="route().current('fiches-travail.create')">
                                     Nouvelle Fiche de Travail
                                 </NavLink>
+                                <NavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('livraisons.index')" :active="route().current('livraisons.*')">
+                                    Livraisons
+                                </NavLink>
+                                <NavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('fournisseurs.index')" :active="route().current('fournisseurs.*')">
+                                    Fournisseurs
+                                </NavLink>
                                 <NavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('tasks.index')" :active="route().current('tasks.index')">
                                     Liste des Tâches
                                 </NavLink>
@@ -148,9 +154,13 @@ const showingNavigationDropdown = ref(false);
                         <ResponsiveNavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('fiches-travail.create')" :active="route().current('fiches-travail.create')">
                             Nouvelle Fiche de Travail
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('livraisons.index')" :active="route().current('livraisons.*')">
+                            Livraisons
+                        </ResponsiveNavLink>
                         <ResponsiveNavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('tasks.index')" :active="route().current('tasks.index')">
                             Liste des Tâches
                         </ResponsiveNavLink>
+
                     </div>
 
                     <!-- Responsive Settings Options -->

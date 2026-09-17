@@ -53,6 +53,9 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('fournisseurs.index')" :active="route().current('fournisseurs.*')">
                                     Fournisseurs
                                 </NavLink>
+                                <NavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('commandes.index')" :active="route().current('commandes.*')">
+                                    Commandes
+                                </NavLink>
                                 <NavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('tasks.index')" :active="route().current('tasks.index')">
                                     Liste des Tâches
                                 </NavLink>
@@ -160,7 +163,9 @@ const showingNavigationDropdown = ref(false);
                         <ResponsiveNavLink v-if="['ouvrier', 'chef_atelier'].includes($page.props.auth.user.role)" :href="route('tasks.index')" :active="route().current('tasks.index')">
                             Liste des Tâches
                         </ResponsiveNavLink>
-
+                        <ResponsiveNavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('commandes.index')" :active="route().current('commandes.*')">
+                            Commandes
+                        </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->

@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Mail\BonDeCommandeMail;
+use Illuminate\Support\Facades\Mail;
 
 class CommandeController extends Controller
 {
@@ -45,7 +47,8 @@ class CommandeController extends Controller
         ]);
 
         // 2. Transaction DB : On s'assure que tout s'enregistre, ou rien du tout
-        DB::transaction(function () use ($validated) {
+        $commande = null;
+        DB::transaction(function () use ($validated, &$commande) {
 
             // A. Création de l'en-tête de la commande
             $commande = Commande::create([
@@ -67,7 +70,10 @@ class CommandeController extends Controller
                 ]);
             }
         });
-
+        $commande->load(['fournisseur', 'lignes.piece']);
+        if ($commande->fournisseur->email) {
+            Mail::to($commande->fournisseur->email)->send(new BonDeCommandeMail($commande));
+        }
         return redirect()->route('commandes.index')->with('message', 'Commande créée avec succès !');
     }
 }

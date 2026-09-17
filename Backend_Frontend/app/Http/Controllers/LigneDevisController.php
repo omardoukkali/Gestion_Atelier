@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Models\Commande;
 use App\Models\LigneCommande;
 use Illuminate\Support\Facades\DB;
+use App\Mail\BonDeCommandeMail;
+use Illuminate\Support\Facades\Mail;
 
 
 class LigneDevisController extends Controller
@@ -52,6 +54,11 @@ class LigneDevisController extends Controller
 
         // On enveloppe tout dans une transaction : soit tout réussit, soit rien
         DB::transaction(function () use ($ligneDevis, $validated, $piece, &$commande) {
+            // Envoi du Bon de Commande au fournisseur (Option A)
+            $commande->load(['fournisseur', 'lignes.piece']);
+            if ($commande->fournisseur->email) {
+                Mail::to($commande->fournisseur->email)->send(new BonDeCommandeMail($commande));
+            }
 
             // 2. Mettre à jour le statut ET la quantité de la ligne de devis
             $ligneDevis->update([

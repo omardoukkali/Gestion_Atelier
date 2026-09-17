@@ -12,6 +12,7 @@ use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\VehiculeController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -69,7 +70,7 @@ Route::middleware('auth')->group(function () {
 
         if ($role === 'chef_atelier') {
             // Le chef a accès au vrai tableau de bord
-            return Inertia::render('Dashboard');
+            return app(DashboardController::class)->index();
         } elseif ($role === 'ouvrier') {
             // L'ouvrier est redirigé vers sa liste de tâches du jour
             return redirect()->route('tasks.index');
@@ -132,7 +133,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // la route pour la gestion des véhicules
-    Route::resource('vehicule', VehicleController::class);
+    Route::resource('vehicules', VehiculeController::class)->only(['index', 'create', 'store']);
 
 });
 

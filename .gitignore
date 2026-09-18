@@ -3,3 +3,9 @@ node_modules/
 .env
 public/storage
 storage/*.key
+# Labo IA — code versionné, mais pas les gros fichiers
+ml-training/*.csv
+ml-training/*.pkl
+ml-training/*.json
+ml-training/.venv/
+ml-training/.idea/

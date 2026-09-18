@@ -11,4 +11,9 @@ class MaintenanceController extends Controller
     {
         return response()->json($ml->predict($request->all()));
     }
+
+    public function lifespan(Request $request, MlService $ml)
+    {
+        return response()->json($ml->predictLifespan($request->all()));
+    }
 }

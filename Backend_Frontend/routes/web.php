@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('livraisons', LivraisonController::class)->only(['index', 'store']);
     Route::resource('fiches-travail', FicheTravailController::class)->only(['create', 'store']);
     Route::resource('tasks', TaskController::class)->only(['index', 'create', 'store']);
+
     // 1. Routes accessibles uniquement par le CHEF D'ATELIER
     Route::middleware(['role:chef_atelier'])->group(function () {
       //  Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->name('dashboard');
@@ -134,7 +135,9 @@ Route::middleware('auth')->group(function () {
 
     // la route pour la gestion des véhicules
     Route::resource('vehicules', VehiculeController::class)->only(['index', 'create', 'store']);
-
+    Route::get('/prediction-plaquettes', function () {
+        return Inertia::render('Maintenance/Predict');
+    })->name('prediction.plaquettes');
 });
 
 

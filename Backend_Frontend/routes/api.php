@@ -16,6 +16,7 @@ use App\Http\Controllers\MaintenanceController;
 |
 */
 Route::post('/predict-maintenance', [MaintenanceController::class, 'predict']);
+Route::post('/predict-lifespan', [MaintenanceController::class, 'lifespan']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

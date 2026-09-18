@@ -12,4 +12,11 @@ class MlService
             ->post(config('services.ml.url').'/predict', $features)
             ->json();
     }
+
+    public function predictLifespan(array $features): array
+    {
+        return Http::timeout(5)
+            ->post(config('services.ml.url').'/predict-lifespan', $features)
+            ->json();
+    }
 }

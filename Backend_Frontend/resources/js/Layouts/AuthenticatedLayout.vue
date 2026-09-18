@@ -32,6 +32,9 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
+                                <NavLink :href="route('prediction.plaquettes')" :active="route().current('prediction.plaquettes')">
+                                    Prédiction plaquettes
+                                </NavLink>
                                 <NavLink v-if="$page.props.auth.user.role === 'chef_atelier'" :href="route('tasks.create')" :active="route().current('tasks.create')">
                                     + Assigner une Tâche
                                 </NavLink>

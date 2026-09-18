@@ -62,7 +62,17 @@ services:
       - "5173:5173"
     networks:
       - atelier_network
-
+  # 5. Service IA (inférence)
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: atelier_ml
+    restart: unless-stopped
+    ports:
+      - "8010:8000"       # DEV uniquement : pour tester /docs. En prod → remplace par "expose: [8000]"
+    networks:
+      - atelier_network   # le MÊME réseau que app / webserver / database
 networks:
   atelier_network:
     driver: bridge
